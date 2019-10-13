@@ -25,4 +25,14 @@ randomNumberIO lowerBound upperBound = randomRIO (lowerBound, upperBound)
 randomNumber lowerBound upperBound = unsafePerformIO (randomNumberIO lowerBound upperBound)
 
 -- generates a random grid cell
-randomCell gridSize = (num (randomNumber 1 gridSize), num (randomNumber 1 gridSize)) 
+randomCell gridSize = (num (randomNumber 1 gridSize), num (randomNumber 1 gridSize))
+
+-- given gridsize and a wall, returns true if the wall is an edge wall
+isEdgeWall :: Integer -> (Integer, Integer, Char) -> Bool
+isEdgeWall gridSize (r, c, w)
+   | (w == 'U' && r == 1) = True
+   | (w == 'D' && r == gridSize) = True
+   | (w == 'L' && c == 1) = True
+   | (w == 'R' && c == gridSize) = True
+   | otherwise = False
+  
