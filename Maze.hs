@@ -3,8 +3,12 @@ module Maze where
 import Data.HashSet
 import System.Random
 
--- createMaze :: Int -> StdGen -> Int
-createMaze randomGen = next randomGen
+-- This is the main function of this module
+createMaze :: Int -> StdGen -> IO()
+createMaze gridSize randomGen = do
+   let randomNum = ((fst $ next randomGen) `mod` gridSize) + 1
+   putStrLn $ "The next random number is: " ++ (show (randomNum))
+   putStrLn $ "Creating Maze of size: " ++ (show gridSize)
 
 -- creates an empty HashSet
 -- More verbose than simply "empty"

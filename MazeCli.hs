@@ -1,9 +1,10 @@
-module Mazecli where
+module MazeCli where
 
 import Data.Char
 import System.Environment
 import System.Exit
 import System.Random
+import Maze
 
 -- ALL IO AND RANDOM NUMBER LOGIC IS HERE
 
@@ -15,8 +16,7 @@ main = do
    showSeed seed
    putStrLn "Please enter the grid size"
    mazeSize <- getNum "\n Please enter a valid number:"
-   print $ getRandomGen seed
-   putStrLn "Now Creating a Maze"
+   createMaze  mazeSize (getRandomGen  seed)
 
 -- Prompt until a valid number is read, and return it
 getNum :: String -> IO Int
