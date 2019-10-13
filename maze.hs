@@ -14,7 +14,26 @@ main = do
    verifyArgsOrQuit args
    seed <- getSeed args
    showSeed seed
-   putStrLn "Done"
+   putStrLn "Please enter the grid size"
+   mazeSize <- getNum "\n Please enter a valid number:"
+   putStrLn "Now Creating a Maze"
+
+-- Prompt until a valid number is read, and return it
+getNum :: String -> IO Int
+getNum prompt =
+  getFromStdin prompt getLine isNum read
+
+-- This contains the logic common to getNum and getYN;
+-- it repeatedly prompts until input matching some criteria
+-- is given, transforms that input, and returns it
+getFromStdin :: String -> (IO a) -> (a -> Bool) -> (a -> b) -> IO b
+getFromStdin prompt inputF isOk transformOk = do
+  input <- inputF
+  if isOk input
+     then return $ transformOk input
+     else do
+       putStr prompt
+       getFromStdin prompt inputF isOk transformOk
 
 -- create a random generator with the specified seed value
 getRandomGen :: Int -> StdGen
