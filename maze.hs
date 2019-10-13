@@ -35,4 +35,15 @@ isEdgeWall gridSize (r, c, w)
    | (w == 'L' && c == 1) = True
    | (w == 'R' && c == gridSize) = True
    | otherwise = False
+ 
+
+-- given a non-edge wall, return its second representation
+-- e.g wall (2, 3, 'L') is the same as wall (2, 2, 'R')
+getSecondRep :: (Integer, Integer, Char) -> (Integer, Integer, Char)
+getSecondRep (r, c, w)
+   | w == 'L' = (r, c - 1, 'R')
+   | w == 'R' = (r, c + 1, 'L')
+   | w == 'U' = (r - 1, c, 'D')
+   | w == 'D' = (r + 1, c, 'U')
+   | otherwise = (-1, -1, 'X')
   
