@@ -15,10 +15,13 @@ createMaze gridSize randomGen = do
    let grid = createGrid gridSize
    let gridInteger = num gridSize
    let maze = primsAlgorithm wallList grid cellsSeen gridInteger nextGenerator
+   let mazeNoDuplicates = removeDuplicateWalls maze
    putStrLn $ "Random Cell: " ++ (show firstRandomCell)
    putStrLn $ "Cells seen: " ++ (show cellsSeen)
    putStrLn $ "Maze: " ++ (show maze)
    putStrLn $ "Maze wall list length: " ++ (show $ length maze)
+   putStrLn $ "Maze: " ++ (show mazeNoDuplicates)
+   putStrLn $ "Maze wall list length: " ++ (show $ length mazeNoDuplicates) 
    putStrLn $ "Origianl grid wall list length: " ++ (show $ length grid)
 
 -- Run prim's algorithm
@@ -57,6 +60,13 @@ createGrid gridSize = [(num r, num c, w) | r <- [1..gridSize], c <- [1..gridSize
 -- Checks if a cell is in range of the grid
 cellInRange :: (Integer, Integer) -> Integer -> Bool
 cellInRange (r, c) gridSize = r > 0 && r <= gridSize && c > 0 && c <= gridSize
+
+-- Remove duplicate walls from a grid
+removeDuplicateWalls :: [(Integer, Integer, Char)] -> [(Integer, Integer, Char)]
+removeDuplicateWalls [] = []
+removeDuplicateWalls (wall : walls)
+   | elem (getSecondRep wall) walls = removeDuplicateWalls walls
+   | otherwise = wall : removeDuplicateWalls walls
 
 -- given gridsize and a wall, returns true if the wall is an edge wall
 isEdgeWall :: Integer -> (Integer, Integer, Char) -> Bool
