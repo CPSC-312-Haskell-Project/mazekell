@@ -13,9 +13,9 @@ createMaze gridSize randomGen = do
    let nextGenerator = get3rd $ getRandomNumPair randomGen
    let cellsSeen = singleton firstRandomCell
    let wallList = allCellWalls firstRandomCell
-   let grid = createGrid gridSize
+   let grid = fromList $ createGrid gridSize
    let gridInteger = num gridSize
-   let maze = primsAlgorithm wallList grid cellsSeen gridInteger nextGenerator
+   let maze = toList $ primsAlgorithm wallList grid cellsSeen gridInteger nextGenerator
    let mazeNoDuplicates = removeDuplicateWalls maze
    createGUI mazeNoDuplicates gridInteger
    putStrLn $ "Random Cell: " ++ (show firstRandomCell)
@@ -39,8 +39,8 @@ primsAlgorithm wallList grid cellsSeen gridSize randomGen = primsAlgorithm newWa
          unseenWalls = removeElement otherWallRep allUnseenCellWalls
          proceed = isValidCell && not otherSeen
          newWallList = if proceed then unionList unseenWalls newWallList1 else newWallList1
-         newGrid1 = if proceed then removeElement wall grid else grid
-         newGrid = if proceed then removeElement otherWallRep newGrid1 else newGrid1
+         newGrid1 = if proceed then delete wall grid else grid
+         newGrid = if proceed then delete otherWallRep newGrid1 else newGrid1
          newCellsSeen = if proceed then insert otherCell cellsSeen else cellsSeen
 
 -- wall representation in our maze. The left wall, right wall, upper wall and lower wall
