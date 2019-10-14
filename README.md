@@ -1,3 +1,9 @@
+To generate maze with GUI:
+
+```
+ghc -- -main-is MazeCli MazeCli.hs -o main -threaded && ./main
+```
+
 To generate a maze, run the following commands:
 
 ```console 
