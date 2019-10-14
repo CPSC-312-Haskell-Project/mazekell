@@ -25,6 +25,7 @@ createMaze gridSize randomGen = do
    putStrLn $ "Maze: " ++ (show mazeNoDuplicates)
    putStrLn $ "Maze wall list length: " ++ (show $ length mazeNoDuplicates) 
    putStrLn $ "Original grid wall list length: " ++ (show $ length grid)
+   putStrLn $ "Origianl grid wall list length: " ++ (show $ length grid)
 
 -- Run prim's algorithm
 primsAlgorithm [] grid cellsSeen gridSize randomGenerator = grid

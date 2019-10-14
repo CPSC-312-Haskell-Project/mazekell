@@ -114,4 +114,3 @@ createGUI maze size = do
    let mazeWalls = map (parseMazeWall) maze
    let initState = initialState mazeWalls size
    play window white 30 initState renderMaze handleInput updateState
-
