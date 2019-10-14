@@ -18,30 +18,28 @@ createMaze gridSize randomGen = do
    putStrLn $ "Random Cell: " ++ (show firstRandomCell)
    putStrLn $ "Cells seen: " ++ (show cellsSeen)
    putStrLn $ "Maze: " ++ (show maze)
+   putStrLn $ "Maze wall list length: " ++ (show $ length maze)
+   putStrLn $ "Origianl grid wall list length: " ++ (show $ length grid)
 
 -- Run prim's algorithm
-primsAlgorithm [] grid cellsSeen gridSize randomGenerator = cellsSeen
+primsAlgorithm [] grid cellsSeen gridSize randomGenerator = grid
 primsAlgorithm wallList grid cellsSeen gridSize randomGen = primsAlgorithm newWallList newGrid newCellsSeen gridSize newRandom
    where randomIndex = fst $ getRandomIndex randomGen $ length wallList
          newRandom = snd $ getRandomIndex randomGen $ length wallList
          wall = wallList !! randomIndex
          intermediateWallList = removeElementAtIndex wallList randomIndex
-         isEdge = isEdgeWall gridSize wall
          otherWallRep = getSecondRep wall
-         newWallList = if isEdge then intermediateWallList else removeElement otherWallRep intermediateWallList
-         currCell = getCellFromWall wall
+         newWallList1 = removeElement otherWallRep intermediateWallList
          otherCell = getCellFromWall otherWallRep
-         thisSeen = member currCell cellsSeen
+         isValidCell = cellInRange otherCell gridSize
          otherSeen = member otherCell cellsSeen
-         goodWall = (thisSeen && not (otherSeen)) || (not (thisSeen) && otherSeen)
-         unseenCell = if thisSeen then otherCell else currCell
---         allUnseenCellWalls = allCellWalls unseenCell
---         newWallList = if goodWall then unionList allUnseenCellWalls newWallList1 else newWallList1
-         newGrid1 = if goodWall then removeElement wall grid else grid
-         newGrid = if goodWall then removeElement otherWallRep newGrid1 else newGrid1
-         newCellsSeen1 = if goodWall then insert currCell cellsSeen else cellsSeen
-         newCellsSeen = if goodWall then insert otherCell newCellsSeen1 else newCellsSeen1
-
+         allUnseenCellWalls = allCellWalls otherCell
+         unseenWalls = removeElement otherWallRep allUnseenCellWalls
+         proceed = isValidCell && not otherSeen
+         newWallList = if proceed then unionList unseenWalls newWallList1 else newWallList1
+         newGrid1 = if proceed then removeElement wall grid else grid
+         newGrid = if proceed then removeElement otherWallRep newGrid1 else newGrid1
+         newCellsSeen = if proceed then insert otherCell cellsSeen else cellsSeen
 
 -- wall representation in our maze. The left wall, right wall, upper wall and lower wall
 -- are represented as 'L', 'R', etc. respectively
