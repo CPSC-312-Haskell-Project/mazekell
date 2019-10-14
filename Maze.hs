@@ -17,14 +17,15 @@ createMaze gridSize randomGen = do
    let gridInteger = num gridSize
    let maze = primsAlgorithm wallList grid cellsSeen gridInteger nextGenerator
    let mazeNoDuplicates = removeDuplicateWalls maze
+   createGUI mazeNoDuplicates gridInteger
    putStrLn $ "Random Cell: " ++ (show firstRandomCell)
    putStrLn $ "Cells seen: " ++ (show cellsSeen)
    putStrLn $ "Maze: " ++ (show maze)
    putStrLn $ "Maze wall list length: " ++ (show $ length maze)
    putStrLn $ "Maze: " ++ (show mazeNoDuplicates)
    putStrLn $ "Maze wall list length: " ++ (show $ length mazeNoDuplicates) 
+   putStrLn $ "Original grid wall list length: " ++ (show $ length grid)
    putStrLn $ "Origianl grid wall list length: " ++ (show $ length grid)
-   makeGUI mazeNoDuplicates (toInteger gridSize)
 
 -- Run prim's algorithm
 primsAlgorithm [] grid cellsSeen gridSize randomGenerator = grid

@@ -1,2 +1,3 @@
 cabal install random
 cabal install unordered-containers
+cabal install gloss
