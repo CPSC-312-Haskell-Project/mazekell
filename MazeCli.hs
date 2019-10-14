@@ -6,7 +6,7 @@ import System.Exit
 import System.Random
 import Maze
 
--- ALL IO AND RANDOM NUMBER LOGIC IS HERE
+-- This module contains all CLI logic 
 
 main :: IO()
 main = do
