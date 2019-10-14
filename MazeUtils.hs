@@ -8,6 +8,12 @@ import System.Random
 -- gets the first two elements as a pair from triplet
 getPairFromTriplet (r, c, _) = (r, c)
 
+-- get first element in a triplet
+get1st (x,_,_) = x
+
+-- get second element in a triplet
+get2nd (_,x,_) = x
+
 -- get third element in a triplet
 get3rd (_, _, x) = x
 
@@ -63,9 +69,3 @@ unionList x [] = x
 unionList (first:listA) listB
    | first `elem` listB = unionList listA listB
    | otherwise = first : unionList listA listB
-
--- Merge lists
-merge :: [a] -> [a] -> [a]
-merge xs     []     = xs
-merge []     ys     = ys
-merge (x:xs) (y:ys) = x : y : merge xs ys

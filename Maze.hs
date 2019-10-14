@@ -3,6 +3,7 @@ module Maze where
 import MazeUtils
 import Data.HashSet
 import System.Random
+import GUI
 
 -- This is the main function of this module
 createMaze :: Int -> StdGen -> IO()
@@ -16,13 +17,14 @@ createMaze gridSize randomGen = do
    let gridInteger = num gridSize
    let maze = primsAlgorithm wallList grid cellsSeen gridInteger nextGenerator
    let mazeNoDuplicates = removeDuplicateWalls maze
+   createGUI mazeNoDuplicates
    putStrLn $ "Random Cell: " ++ (show firstRandomCell)
    putStrLn $ "Cells seen: " ++ (show cellsSeen)
    putStrLn $ "Maze: " ++ (show maze)
    putStrLn $ "Maze wall list length: " ++ (show $ length maze)
    putStrLn $ "Maze: " ++ (show mazeNoDuplicates)
    putStrLn $ "Maze wall list length: " ++ (show $ length mazeNoDuplicates) 
-   putStrLn $ "Origianl grid wall list length: " ++ (show $ length grid)
+   putStrLn $ "Original grid wall list length: " ++ (show $ length grid)
 
 -- Run prim's algorithm
 primsAlgorithm [] grid cellsSeen gridSize randomGenerator = grid
