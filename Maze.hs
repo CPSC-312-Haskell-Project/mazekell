@@ -19,13 +19,9 @@ createMaze gridSize randomGen = do
    let mazeNoDuplicates = removeDuplicateWalls maze
    createGUI mazeNoDuplicates gridInteger
    putStrLn $ "Random Cell: " ++ (show firstRandomCell)
-   putStrLn $ "Cells seen: " ++ (show cellsSeen)
-   putStrLn $ "Maze: " ++ (show maze)
-   putStrLn $ "Maze wall list length: " ++ (show $ length maze)
-   putStrLn $ "Maze: " ++ (show mazeNoDuplicates)
+   putStrLn $ "Generated maze is: " ++ (show $ mazeNoDuplicates)
    putStrLn $ "Maze wall list length: " ++ (show $ length mazeNoDuplicates) 
-   putStrLn $ "Original grid wall list length: " ++ (show $ length grid)
-   putStrLn $ "Origianl grid wall list length: " ++ (show $ length grid)
+   putStrLn $ "Original grid wall list length: " ++ (show $ length grid) 
 
 -- Run prim's algorithm
 primsAlgorithm [] grid cellsSeen gridSize randomGenerator = grid
