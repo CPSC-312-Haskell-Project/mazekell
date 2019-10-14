@@ -56,8 +56,9 @@ allCellWalls (r, c) = [(r, c, w) | w <- walls]
 createGrid :: (Integral a, Num b, Num c) => a -> [(b, c, Char)]
 createGrid gridSize = [(num r, num c, w) | r <- [1..gridSize], c <- [1..gridSize], w <- walls]
 
--- generates a random grid cell
--- randomCell gridSize = (num (randomNumber 1 gridSize), num (randomNumber 1 gridSize))
+-- Checks if a cell is in range of the grid
+cellInRange :: (Integer, Integer) -> Integer -> Bool
+cellInRange (r, c) gridSize = r > 0 && r <= gridSize && c > 0 && c <= gridSize
 
 -- given gridsize and a wall, returns true if the wall is an edge wall
 isEdgeWall :: Integer -> (Integer, Integer, Char) -> Bool
