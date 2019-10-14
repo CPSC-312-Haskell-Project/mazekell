@@ -6,3 +6,8 @@ ghci MazeCli.hs
 main
 ```
 
+To run GUI, use this command:
+
+```
+ghc -- GUI.hs -o main -threaded && ./main
+```

@@ -63,3 +63,9 @@ unionList x [] = x
 unionList (first:listA) listB
    | first `elem` listB = unionList listA listB
    | otherwise = first : unionList listA listB
+
+-- Merge lists
+merge :: [a] -> [a] -> [a]
+merge xs     []     = xs
+merge []     ys     = ys
+merge (x:xs) (y:ys) = x : y : merge xs ys
