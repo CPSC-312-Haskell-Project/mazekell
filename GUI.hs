@@ -14,11 +14,11 @@ window = InWindow "Maze Game" (width, height) (10, 10)
 wall :: Picture
 wall = color black (rectangleSolid 5 10)
 
-goal :: Picture
-goal = color green (rectangleSolid 10 10)
+goalPic :: Picture
+goalPic = color green (rectangleSolid 10 10)
 
-player :: Picture
-player = color red (circle 10)
+playerPic :: Picture
+playerPic = color red (circle 10)
 
 data Game = Game
   { playerLoc :: (Float, Float),  -- player (x, y) location.
@@ -45,9 +45,9 @@ renderMaze :: Game -> Picture
 renderMaze game =
    pictures [player, goal, walls]
       where
-         player = uncurry translate (playerLoc game) player
+         player = uncurry translate (playerLoc game) playerPic
          walls = pictures (createWalls (mazeWalls game))
-         goal = uncurry translate (goalLoc game) goal
+         goal = uncurry translate (goalLoc game) goalPic
 
 
 createWalls :: [(Float, Float, Char)] -> [Picture]
@@ -64,10 +64,10 @@ parseWall t =
 
 getDegree :: Char -> Float
 getDegree dir
-   | dir == 'U' = 0
+   | dir == 'U' = 270
    | dir == 'D' = 90
    | dir == 'L' = 180
-   | dir == 'R' = 270
+   | dir == 'R' = 0
    | otherwise = 0
 
 handleInput :: Event -> Game -> Game
