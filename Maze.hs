@@ -1,5 +1,6 @@
 module Maze where
 
+import MazeUtils
 import Data.HashSet
 import System.Random
 
@@ -7,22 +8,23 @@ import System.Random
 createMaze :: Int -> StdGen -> IO()
 createMaze gridSize randomGen = do
    let randomNum = ((fst $ next randomGen) `mod` gridSize) + 1
-   putStrLn $ "The next random number is: " ++ (show (randomNum))
-   putStrLn $ "Creating Maze of size: " ++ (show gridSize)
+   let firstRandom = getRandomNumPair randomGen
+   putStrLn $ "The first random pair is: " ++ (show $ getPairFromTriplet firstRandom)
+   let secondGen = get3rd firstRandom
+   putStrLn $ "The next random pair is: " ++ (show $ getRandomNumPair secondGen)
 
--- creates an empty HashSet
--- More verbose than simply "empty"
-createEmptySet :: HashSet a
-createEmptySet = empty
+getRandomNumPair :: StdGen -> (Int, Int, StdGen)
+getRandomNumPair generator = (firstRand, secondRand, nextGen)
+   where firstGen = next generator
+         firstRand = fst firstGen
+         secondGen = next $ snd firstGen
+         secondRand = fst secondGen
+         nextGen = snd secondGen
 
 -- wall representation in our maze. The left wall, right wall, upper wall and lower wall
 -- are represented as 'L', 'R', etc. respectively
 walls :: [Char]
 walls = ['L', 'R', 'U', 'D']
-
--- Easier to write function to convert Int -> Num
-num :: (Integral a, Num b) => a -> b
-num = fromIntegral 
 
 -- Creates a grid list full of walls
 createGrid :: (Integral a, Num b, Num c) => a -> [(b, c, Char)]
