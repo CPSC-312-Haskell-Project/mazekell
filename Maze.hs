@@ -16,8 +16,8 @@ createMaze gridSize randomGen = do
    let grid = fromList $ createGrid gridSize
    let gridInteger = num gridSize
    let maze = toList $ primsAlgorithm wallList grid cellsSeen gridInteger nextGenerator
+   createGUI maze gridInteger
    let mazeNoDuplicates = removeDuplicateWalls maze
-   createGUI mazeNoDuplicates gridInteger
    putStrLn $ "Random Cell: " ++ (show firstRandomCell)
    putStrLn $ "Generated maze is: " ++ (show $ mazeNoDuplicates)
    putStrLn $ "Maze wall list length: " ++ (show $ length mazeNoDuplicates) 
@@ -60,13 +60,6 @@ createGrid gridSize = [(num r, num c, w) | r <- [1..gridSize], c <- [1..gridSize
 cellInRange :: (Integer, Integer) -> Integer -> Bool
 cellInRange (r, c) gridSize = r > 0 && r <= gridSize && c > 0 && c <= gridSize
 
--- Remove duplicate walls from a grid
-removeDuplicateWalls :: [(Integer, Integer, Char)] -> [(Integer, Integer, Char)]
-removeDuplicateWalls [] = []
-removeDuplicateWalls (wall : walls)
-   | elem (getSecondRep wall) walls = removeDuplicateWalls walls
-   | otherwise = wall : removeDuplicateWalls walls
-
 -- given gridsize and a wall, returns true if the wall is an edge wall
 isEdgeWall :: Integer -> (Integer, Integer, Char) -> Bool
 isEdgeWall gridSize (r, c, w)
@@ -75,16 +68,6 @@ isEdgeWall gridSize (r, c, w)
    | (w == 'L' && c == 1) = True
    | (w == 'R' && c == gridSize) = True
    | otherwise = False
- 
--- given a non-edge wall, return its second representation
--- e.g wall (2, 3, 'L') is the same as wall (2, 2, 'R')
-getSecondRep :: (Integer, Integer, Char) -> (Integer, Integer, Char)
-getSecondRep (r, c, w)
-   | w == 'L' = (r, c - 1, 'R')
-   | w == 'R' = (r, c + 1, 'L')
-   | w == 'U' = (r - 1, c, 'D')
-   | w == 'D' = (r + 1, c, 'U')
-   | otherwise = (-1, -1, 'X')
 
 -- given a wall, return the cell it belongs to
 getCellFromWall :: (Integer, Integer, Char) -> (Integer, Integer)
