@@ -21,8 +21,8 @@ playerPic :: Float -> Picture
 playerPic r = color red (circleSolid r)
 
 -- offset is for moving the entire maze origin to bottom left corner from center
-offset :: Float -> Float
-offset size = 390
+offset :: Float
+offset = 390
 
 -- scale factor
 scaleFactor :: Float -> Float
@@ -32,19 +32,21 @@ data Game = Game
   { playerLoc :: (Float, Float),  -- player (x, y) location.
     goalLoc :: (Float, Float),  -- goal (x, y) location.
     mazeWalls :: [(Float, Float, Char)],  -- wall (x,y,dir) locations.
+    mwd :: [(Integer, Integer, Char)],
     size :: Float -- grid size
   } deriving Show 
 
-initialState :: [(Float, Float, Char)] -> Float -> Game
-initialState maze size = Game
+initialState :: [(Float, Float, Char)] -> [(Integer, Integer, Char)] -> Float -> Game
+initialState maze mwd size = Game
   { playerLoc = (0-o+(c/2), 0-o+(c/2)), -- startPoint, handle input from algorithm
     goalLoc = (0+o-(c/2), 0+o-(c/2)), -- endPoint, handle input from algorithm
     mazeWalls = maze,
+    mwd = mwd,
     size = size
   }
      where
      c = scaleFactor size
-     o = offset size
+     o = offset
 
 parseMazeWall :: (Integer, Integer, Char) -> (Float, Float, Char)
 parseMazeWall t =
@@ -69,10 +71,10 @@ createWalls mazeWalls size =
 
 parseWall :: Float -> (Float, Float, Char) -> Picture
 parseWall size t
-   | dir == 'U' = translate (c*(y-1)+(c/2)-(offset size)) (h-(c*(x-1))-(offset size)) $ wall c (c/10)
-   | dir == 'D' = translate (c*(y-1)+(c/2)-(offset size)) (h-(c*x)-(offset size))  $ rectangleSolid c (c/10)
-   | dir == 'L' = translate (c*(y-1)-(offset size)) (h-(c/2)-(c*(x-1))-(offset size))  $ rectangleSolid (c/10) c
-   | dir == 'R' = translate (c*y-(offset size)) (h-(c/2)-(c*(x-1))-(offset size))  $ rectangleSolid (c/10) c
+   | dir == 'U' = translate (c*(y-1)+(c/2)-(offset)) (h-(c*(x-1))-(offset)) $ wall c (c/10)
+   | dir == 'D' = translate (c*(y-1)+(c/2)-(offset)) (h-(c*x)-(offset))  $ rectangleSolid c (c/10)
+   | dir == 'L' = translate (c*(y-1)-(offset)) (h-(c/2)-(c*(x-1))-(offset))  $ rectangleSolid (c/10) c
+   | dir == 'R' = translate (c*y-(offset)) (h-(c/2)-(c*(x-1))-(offset))  $ rectangleSolid (c/10) c
       where
          x = get1st t
          y = get2nd t
@@ -81,34 +83,43 @@ parseWall size t
          h = c * size
 
 handleInput :: Event -> Game -> Game
-handleInput (EventKey (Char 'w') Down _ _) game =
-   game { playerLoc = (x, (y+unit)), goalLoc = (goalLoc game), mazeWalls = (mazeWalls game), size = (size game) }
-   where
-      (x, y) = playerLoc game
-      unit = scaleFactor (size game)
-handleInput (EventKey (Char 'a') Down _ _) game =
-   game { playerLoc = ((x-unit), y), goalLoc = (goalLoc game), mazeWalls = (mazeWalls game), size = (size game) }
-   where
-      (x, y) = playerLoc game
-      unit = scaleFactor (size game)
-handleInput (EventKey (Char 's') Down _ _) game =
-    game { playerLoc = (x, (y-unit)), goalLoc = (goalLoc game), mazeWalls = (mazeWalls game), size = (size game) }
-    where
-       (x, y) = playerLoc game
-       unit = scaleFactor (size game)
-handleInput (EventKey (Char 'd') Down _ _) game =
-   game { playerLoc = ((x+unit), y), goalLoc = (goalLoc game), mazeWalls = (mazeWalls game), size = (size game) }
-   where
-      (x, y) = playerLoc game
-      unit = scaleFactor (size game)
+handleInput (EventKey (Char 'w') Down _ _) game
+   | checkMove game 'U' = game { playerLoc = (x, (y+unit)), goalLoc = (goalLoc game), mazeWalls = (mazeWalls game), mwd = (mwd game), size = (size game) }
+   | otherwise = game
+      where
+         (x, y) = playerLoc game
+         unit = scaleFactor (size game)
+         
+handleInput (EventKey (Char 'a') Down _ _) game
+   | checkMove game 'L' = game { playerLoc = ((x-unit), y), goalLoc = (goalLoc game), mazeWalls = (mazeWalls game), mwd = (mwd game), size = (size game) }
+   | otherwise = game
+      where
+         (x, y) = playerLoc game
+         unit = scaleFactor (size game)
+         
+handleInput (EventKey (Char 's') Down _ _) game
+   | checkMove game 'D' = Game { playerLoc = (x, (y-unit)), goalLoc = (goalLoc game), mazeWalls = (mazeWalls game), mwd = (mwd game), size = (size game) }
+   | otherwise = game
+      where
+         (x, y) = playerLoc game
+         unit = scaleFactor (size game)
+                  
+handleInput (EventKey (Char 'd') Down _ _) game
+   | checkMove game 'R' = Game { playerLoc = ((x+unit),y), goalLoc = (goalLoc game), mazeWalls = (mazeWalls game), mwd = (mwd game), size = (size game) }
+   | otherwise = game
+      where
+         (x, y) = playerLoc game
+         unit = scaleFactor (size game)
+
 handleInput (EventKey (Char 'r') Down _ _) game =
-   initialState (mazeWalls game) (size game)
+   initialState (mazeWalls game) (mwd game) (size game)
+
 handleInput _ game =
    game
 
 handleGoal :: Game -> Game
 handleGoal game =
-  if (x2-unit) < x && x < (x2+unit) && (y2-unit) < y && y < (y2+unit) then initialState (mazeWalls game) (size game) -- This resets the game state
+  if (x2-unit) < x && x < (x2+unit) && (y2-unit) < y && y < (y2+unit) then initialState (mazeWalls game) (mwd game) (size game) -- This resets the game state
      else game
         where
            (x, y) = playerLoc game
@@ -119,8 +130,27 @@ updateState :: Float -> Game -> Game
 updateState _ game =
    handleGoal game
 
-createGUI maze size = do
+createGUI :: Integral a => [(Integer, Integer, Char)] -> [(Integer, Integer, Char)] -> a -> IO ()
+createGUI maze mwd size = do
    let mazeWalls = map (parseMazeWall) maze
    let sizeFloat = num size
-   let initState = initialState mazeWalls sizeFloat
+   let initState = initialState mazeWalls mwd sizeFloat
    play window white 30 initState renderMaze handleInput updateState
+
+-- converts coordinates to triplet
+findGridLocation :: Float -> (Float, Float) -> Char -> (Integer, Integer, Char)
+findGridLocation s (x,y) dir = 
+   (toInteger (ceiling (s-(fromIntegral (div (toInteger (ceiling (mul*(o+y)))) c)))), 1+(div (toInteger (ceiling (mul*(o+x)))) c), dir)
+      where
+      mul = 100000
+      o = offset
+      c = toInteger (ceiling (mul*(scaleFactor s)))
+      
+      
+-- finds triplet in list
+findWall :: (Integer, Integer, Char) -> [(Integer, Integer, Char)] -> Bool
+findWall (x,y,l) list = foldr (\ (j,k,m) r -> ((j==x) && (k==y) && (m==l)) || r) False list
+
+-- helper to simplifly handleInput:
+checkMove :: Game -> Char -> Bool
+checkMove game dir = not (findWall (findGridLocation (size game) (playerLoc game) dir) (mwd game))
