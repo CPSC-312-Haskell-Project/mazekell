@@ -69,3 +69,20 @@ unionList x [] = x
 unionList (first:listA) listB
    | first `elem` listB = unionList listA listB
    | otherwise = first : unionList listA listB
+
+-- Remove duplicate walls from a grid
+removeDuplicateWalls :: [(Integer, Integer, Char)] -> [(Integer, Integer, Char)]
+removeDuplicateWalls [] = []
+removeDuplicateWalls (wall : walls)
+   | elem (getSecondRep wall) walls = removeDuplicateWalls walls
+   | otherwise = wall : removeDuplicateWalls walls
+   
+-- given a non-edge wall, return its second representation
+-- e.g wall (2, 3, 'L') is the same as wall (2, 2, 'R')
+getSecondRep :: (Integer, Integer, Char) -> (Integer, Integer, Char)
+getSecondRep (r, c, w)
+   | w == 'L' = (r, c - 1, 'R')
+   | w == 'R' = (r, c + 1, 'L')
+   | w == 'U' = (r - 1, c, 'D')
+   | w == 'D' = (r + 1, c, 'U')
+   | otherwise = (-1, -1, 'X')
