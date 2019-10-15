@@ -5,8 +5,8 @@ import Graphics.Gloss.Interface.Pure.Game
 import MazeUtils
 
 width, height :: Int
-width = 1000
-height = 1000
+width = 800
+height = 800
 
 window :: Display
 window = InWindow "Maze Game" (width, height) (100, 100)
@@ -22,23 +22,11 @@ playerPic r = color red (circleSolid r)
 
 -- offset is for moving the entire maze origin to bottom left corner from center
 offset :: Float -> Float
-offset size
-     | size < 5 = size * size * (50 / size)
-     | size < 10 = size * size * (40 / size)
-     | size < 20 = size * size * (20 / size)
-     | size < 30 = size * size * (15 / size)
-     | size < 40 = size * size * (10 / size)
-     | size < 50 = size * size * (5 / size)
+offset size = 390
 
 -- scale factor
 scaleFactor :: Float -> Float
-scaleFactor size
-  | size < 5 = size * (100 / size)
-  | size < 10 = size * (80 / size)
-  | size < 20 = size * (40 / size)
-  | size < 30 = size * (30 / size)
-  | size < 40 = size * (20 / size)
-  | size < 50 = size * (10 / size)
+scaleFactor size = (fromIntegral height-20) / size
 
 data Game = Game
   { playerLoc :: (Float, Float),  -- player (x, y) location.
@@ -49,13 +37,14 @@ data Game = Game
 
 initialState :: [(Float, Float, Char)] -> Float -> Game
 initialState maze size = Game
-  { playerLoc = (0 - (offset size) + (c/4), 0 - (offset size) + (c/4)), -- startPoint, handle input from algorithm
-    goalLoc = (0 + (offset size) - (c/4), 0 + (offset size) - (c/4)), -- endPoint, handle input from algorithm
+  { playerLoc = (0-o+(c/2), 0-o+(c/2)), -- startPoint, handle input from algorithm
+    goalLoc = (0+o-(c/2), 0+o-(c/2)), -- endPoint, handle input from algorithm
     mazeWalls = maze,
     size = size
   }
      where
      c = scaleFactor size
+     o = offset size
 
 parseMazeWall :: (Integer, Integer, Char) -> (Float, Float, Char)
 parseMazeWall t =
@@ -92,27 +81,27 @@ parseWall size t
          h = c * size
 
 handleInput :: Event -> Game -> Game
-handleInput (EventKey (Char 'w') _ _ _) game =
+handleInput (EventKey (Char 'w') Down _ _) game =
    game { playerLoc = (x, (y+unit)), goalLoc = (goalLoc game), mazeWalls = (mazeWalls game), size = (size game) }
    where
       (x, y) = playerLoc game
-      unit = (scaleFactor (size game)) / 4
-handleInput (EventKey (Char 'a') _ _ _) game =
+      unit = scaleFactor (size game)
+handleInput (EventKey (Char 'a') Down _ _) game =
    game { playerLoc = ((x-unit), y), goalLoc = (goalLoc game), mazeWalls = (mazeWalls game), size = (size game) }
    where
       (x, y) = playerLoc game
-      unit = (scaleFactor (size game)) / 4
-handleInput (EventKey (Char 's') _ _ _) game =
+      unit = scaleFactor (size game)
+handleInput (EventKey (Char 's') Down _ _) game =
     game { playerLoc = (x, (y-unit)), goalLoc = (goalLoc game), mazeWalls = (mazeWalls game), size = (size game) }
     where
        (x, y) = playerLoc game
-       unit = (scaleFactor (size game)) / 4
-handleInput (EventKey (Char 'd') _ _ _) game =
+       unit = scaleFactor (size game)
+handleInput (EventKey (Char 'd') Down _ _) game =
    game { playerLoc = ((x+unit), y), goalLoc = (goalLoc game), mazeWalls = (mazeWalls game), size = (size game) }
    where
       (x, y) = playerLoc game
-      unit = (scaleFactor (size game)) / 4
-handleInput (EventKey (Char 'r') _ _ _) game =
+      unit = scaleFactor (size game)
+handleInput (EventKey (Char 'r') Down _ _) game =
    initialState (mazeWalls game) (size game)
 handleInput _ game =
    game
