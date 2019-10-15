@@ -14,34 +14,48 @@ window = InWindow "Maze Game" (width, height) (100, 100)
 wall :: Float -> Float -> Picture
 wall w h = color black (rectangleSolid w h)
 
-goalPic :: Picture
-goalPic = color green (rectangleSolid 30 30)
+goalPic :: Float -> Picture
+goalPic r = color green (circleSolid r)
 
-playerPic :: Picture
-playerPic = color red (circle 10)
+playerPic :: Float -> Picture
+playerPic r = color red (circleSolid r)
 
 -- offset is for moving the entire maze origin to bottom left corner from center
-offset :: Float
-offset = 440
+offset :: Float -> Float
+offset size
+     | size < 5 = size * size * (50 / size)
+     | size < 10 = size * size * (40 / size)
+     | size < 20 = size * size * (20 / size)
+     | size < 30 = size * size * (15 / size)
+     | size < 40 = size * size * (10 / size)
+     | size < 50 = size * size * (5 / size)
 
 -- scale factor
-c :: Float
-c = 40
+scaleFactor :: Float -> Float
+scaleFactor size
+  | size < 5 = size * (100 / size)
+  | size < 10 = size * (80 / size)
+  | size < 20 = size * (40 / size)
+  | size < 30 = size * (30 / size)
+  | size < 40 = size * (20 / size)
+  | size < 50 = size * (10 / size)
 
 data Game = Game
   { playerLoc :: (Float, Float),  -- player (x, y) location.
     goalLoc :: (Float, Float),  -- goal (x, y) location.
     mazeWalls :: [(Float, Float, Char)],  -- wall (x,y,dir) locations.
-    size :: Integer -- grid size
+    size :: Float -- grid size
   } deriving Show 
 
-initialState :: [(Float, Float, Char)] -> Integer -> Game
+initialState :: [(Float, Float, Char)] -> Float -> Game
 initialState maze size = Game
-  { playerLoc = (0, 0), -- startPoint, handle input from algorithm
-    goalLoc = (100, 100), -- endPoint, handle input from algorithm
+  { playerLoc = (0 - (offset size) + (c/4), 0 - (offset size) + (c/4)), -- startPoint, handle input from algorithm
+    goalLoc = (0 + (offset size) - (c/4), 0 + (offset size) - (c/4)), -- endPoint, handle input from algorithm
     mazeWalls = maze,
     size = size
   }
+     where
+     c = scaleFactor size
 
 parseMazeWall :: (Integer, Integer, Char) -> (Float, Float, Char)
 parseMazeWall t =
@@ -55,62 +69,69 @@ renderMaze :: Game -> Picture
 renderMaze game =
    pictures [player, goal, walls]
       where
-         player = uncurry translate (playerLoc game) playerPic
+         c = scaleFactor (size game)
+         player = uncurry translate (playerLoc game) (playerPic (c/4))
          walls = pictures (createWalls (mazeWalls game) (size game))
-         goal = uncurry translate (goalLoc game) goalPic
+         goal = uncurry translate (goalLoc game) (goalPic (c/4))
 
-createWalls :: [(Float, Float, Char)] -> Integer -> [Picture]
+createWalls :: [(Float, Float, Char)] -> Float -> [Picture]
 createWalls mazeWalls size =
    map (parseWall size) mazeWalls
 
-parseWall :: Integer -> (Float, Float, Char) -> Picture
+parseWall :: Float -> (Float, Float, Char) -> Picture
 parseWall size t
-   | dir == 'U' = translate (c*(y-1)+(c/2)-offset) (h-(c*(x-1))-offset) $ wall c (c/10)
-   | dir == 'D' = translate (c*(y-1)+(c/2)-offset) (h-(c*x)-offset)  $ rectangleSolid c (c/10)
-   | dir == 'L' = translate (c*(y-1)-offset) (h-(c/2)-(c*(x-1))-offset)  $ rectangleSolid (c/10) c
-   | dir == 'R' = translate (c*y-offset) (h-(c/2)-(c*(x-1))-offset)  $ rectangleSolid (c/10) c
+   | dir == 'U' = translate (c*(y-1)+(c/2)-(offset size)) (h-(c*(x-1))-(offset size)) $ wall c (c/10)
+   | dir == 'D' = translate (c*(y-1)+(c/2)-(offset size)) (h-(c*x)-(offset size))  $ rectangleSolid c (c/10)
+   | dir == 'L' = translate (c*(y-1)-(offset size)) (h-(c/2)-(c*(x-1))-(offset size))  $ rectangleSolid (c/10) c
+   | dir == 'R' = translate (c*y-(offset size)) (h-(c/2)-(c*(x-1))-(offset size))  $ rectangleSolid (c/10) c
       where
          x = get1st t
          y = get2nd t
          dir = get3rd t
-         h = c*fromIntegral(size)
+         c = scaleFactor size
+         h = c * size
 
 handleInput :: Event -> Game -> Game
 handleInput (EventKey (Char 'w') _ _ _) game =
-   game { playerLoc = (x, (y+10)), goalLoc = (goalLoc game), mazeWalls = (mazeWalls game), size = (size game) }
+   game { playerLoc = (x, (y+unit)), goalLoc = (goalLoc game), mazeWalls = (mazeWalls game), size = (size game) }
    where
       (x, y) = playerLoc game
+      unit = (scaleFactor (size game)) / 4
 handleInput (EventKey (Char 'a') _ _ _) game =
-   game { playerLoc = ((x-10), y), goalLoc = (goalLoc game), mazeWalls = (mazeWalls game), size = (size game) }
+   game { playerLoc = ((x-unit), y), goalLoc = (goalLoc game), mazeWalls = (mazeWalls game), size = (size game) }
    where
       (x, y) = playerLoc game
+      unit = (scaleFactor (size game)) / 4
 handleInput (EventKey (Char 's') _ _ _) game =
-    game { playerLoc = (x, (y-10)), goalLoc = (goalLoc game), mazeWalls = (mazeWalls game), size = (size game) }
+    game { playerLoc = (x, (y-unit)), goalLoc = (goalLoc game), mazeWalls = (mazeWalls game), size = (size game) }
     where
        (x, y) = playerLoc game
+       unit = (scaleFactor (size game)) / 4
 handleInput (EventKey (Char 'd') _ _ _) game =
-   game { playerLoc = ((x+10), y), goalLoc = (goalLoc game), mazeWalls = (mazeWalls game), size = (size game) }
+   game { playerLoc = ((x+unit), y), goalLoc = (goalLoc game), mazeWalls = (mazeWalls game), size = (size game) }
    where
       (x, y) = playerLoc game
+      unit = (scaleFactor (size game)) / 4
 handleInput (EventKey (Char 'r') _ _ _) game =
-   game { playerLoc = (0, 0), goalLoc = (goalLoc game), mazeWalls = (mazeWalls game), size = (size game) }
+   initialState (mazeWalls game) (size game)
 handleInput _ game =
    game
 
 handleGoal :: Game -> Game
 handleGoal game =
-  if (x2-20) < x && x < (x2+20) && (y2-20) < y && y < (y2+20) then game { playerLoc = (0, 0), goalLoc = (goalLoc game), mazeWalls = (mazeWalls game), size = (size game) } -- This resets the game state
+  if (x2-unit) < x && x < (x2+unit) && (y2-unit) < y && y < (y2+unit) then initialState (mazeWalls game) (size game) -- This resets the game state
      else game
         where
            (x, y) = playerLoc game
            (x2, y2) = goalLoc game
+           unit = (scaleFactor (size game)) / 4
 
 updateState :: Float -> Game -> Game
 updateState _ game =
    handleGoal game
 
 createGUI maze size = do
-   -- Some Issue here
    let mazeWalls = map (parseMazeWall) maze
-   let initState = initialState mazeWalls size
+   let sizeFloat = num size
+   let initState = initialState mazeWalls sizeFloat
    play window white 30 initState renderMaze handleInput updateState
