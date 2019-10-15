@@ -21,7 +21,7 @@ main = do
 -- Prompt until a valid number is read, and return it
 getNum :: String -> IO Int
 getNum prompt =
-  getFromStdin prompt getLine isNum read
+  getFromStdin prompt getLine validateGridSize read
 
 -- This contains the logic common to getNum;
 -- it repeatedly prompts until input matching some criteria
@@ -72,6 +72,12 @@ exitWithBadArgs = do
 verifyArgs :: [String] -> Bool
 verifyArgs [] = True
 verifyArgs (x:xs) = Prelude.null xs && isNum x
+
+-- Validate gridSize which the user inputs
+-- If the user does not input a string, or the value of the integer
+-- is > 50, then return false
+validateGridSize :: String -> Bool
+validateGridSize input = isNum input && (read input <= 50)
 
 -- Verify that input is a number.  This approach was chosen as read raises an
 -- exception if it can't parse its input
