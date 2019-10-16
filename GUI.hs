@@ -2,6 +2,7 @@ module GUI where
 
 import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Game
+import System.Random
 import MazeUtils
 
 -- width and height of the window
@@ -156,8 +157,8 @@ updateState :: Float -> Game -> Game
 updateState _ game = handleGoal game
 
 -- sets initial state and launches the game window
-createGUI :: Integral a => [(Integer, Integer, Char)] -> a -> IO ()
-createGUI maze size = do
+createGUI :: Integral a => [(Integer, Integer, Char)] -> a -> StdGen -> IO ()
+createGUI maze size ranGen = do
    let mazeWalls = map (parseMazeWall) (removeDuplicateWalls maze)
    let sizeFloat = num size
    let initState = initialState mazeWalls maze sizeFloat

@@ -15,16 +15,15 @@ createMaze gridSize randomGen = do
    let wallList = allCellWalls firstRandomCell
    let grid = fromList $ createGrid gridSize
    let gridInteger = num gridSize
-   let maze = toList $ primsAlgorithm wallList grid cellsSeen gridInteger nextGenerator
-   createGUI maze gridInteger
-   let mazeNoDuplicates = removeDuplicateWalls maze
+   let mazeRand = primsAlgorithm wallList grid cellsSeen gridInteger nextGenerator
+   let maze = toList $ fst $ mazeRand
+   let nextGen = snd $ mazeRand
+   createGUI maze gridInteger nextGen
    putStrLn $ "Random Cell: " ++ (show firstRandomCell)
-   putStrLn $ "Generated maze is: " ++ (show $ mazeNoDuplicates)
-   putStrLn $ "Maze wall list length: " ++ (show $ length mazeNoDuplicates) 
    putStrLn $ "Original grid wall list length: " ++ (show $ length grid) 
 
 -- Run prim's algorithm
-primsAlgorithm [] grid cellsSeen gridSize randomGenerator = grid
+primsAlgorithm [] grid cellsSeen gridSize randomGenerator = (grid, randomGenerator)
 primsAlgorithm wallList grid cellsSeen gridSize randomGen = primsAlgorithm newWallList newGrid newCellsSeen gridSize newRandom
    where randomIndex = fst $ getRandomIndex randomGen $ length wallList
          newRandom = snd $ getRandomIndex randomGen $ length wallList
