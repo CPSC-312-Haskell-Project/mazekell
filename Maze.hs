@@ -8,19 +8,23 @@ import GUI
 -- This is the main function of this module
 createMaze :: Int -> StdGen -> IO()
 createMaze gridSize randomGen = do
-   let firstRandomCellInt = modRandomNumPair gridSize $ getPairFromTriplet $ getRandomNumPair randomGen
-   let firstRandomCell = pairIntToNum firstRandomCellInt
-   let nextGenerator = get3rd $ getRandomNumPair randomGen
-   let cellsSeen = singleton firstRandomCell
-   let wallList = allCellWalls firstRandomCell
-   let grid = fromList $ createGrid gridSize
    let gridInteger = num gridSize
-   let mazeRand = primsAlgorithm wallList grid cellsSeen gridInteger nextGenerator
+   let mazeRand = getMaze gridInteger randomGen
    let maze = toList $ fst $ mazeRand
    let nextGen = snd $ mazeRand
    createGUI maze gridInteger nextGen
-   putStrLn $ "Random Cell: " ++ (show firstRandomCell)
-   putStrLn $ "Original grid wall list length: " ++ (show $ length grid) 
+   putStrLn $ "Original grid wall list length: " ++ (show $ length maze)
+
+
+-- Top level wrapper for running Prim's Algorithm, that can be called to get a maze
+getMaze gridSize randomGen = primsAlgorithm wallList grid cellsSeen gridSize nextGenerator
+   where firstRandomCellInt = modRandomNumPair  (num gridSize) $ getPairFromTriplet $ getRandomNumPair randomGen
+         firstRandomCell = pairIntToNum firstRandomCellInt
+         nextGenerator = get3rd $ getRandomNumPair randomGen
+         cellsSeen = singleton firstRandomCell
+         wallList = allCellWalls firstRandomCell
+         grid = fromList $ createGrid gridSize
+
 
 -- Run prim's algorithm
 primsAlgorithm [] grid cellsSeen gridSize randomGenerator = (grid, randomGenerator)
