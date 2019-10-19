@@ -3,17 +3,15 @@ module Maze where
 import MazeUtils
 import Data.HashSet
 import System.Random
-import GUI
 
 -- This is the main function of this module
-createMaze :: Int -> StdGen -> IO()
-createMaze gridSize randomGen = do
-   let gridInteger = num gridSize
-   let mazeRand = getMaze gridInteger randomGen
-   let maze = toList $ fst $ mazeRand
-   let nextGen = snd $ mazeRand
-   createGUI maze gridInteger nextGen
-   putStrLn $ "Original grid wall list length: " ++ (show $ length maze)
+createMaze :: Int -> StdGen -> ([(Integer, Integer, Char)], Integer, StdGen)
+createMaze gridSize randomGen = (maze, gridInteger, nextGen)
+   where gridInteger = num gridSize
+         mazeRand = getMaze gridInteger randomGen
+         maze = toList $ fst $ mazeRand
+         nextGen = snd $ mazeRand
+   -- putStrLn $ "Original grid wall list length: " ++ (show $ length maze)
 
 
 -- Top level wrapper for running Prim's Algorithm, that can be called to get a maze

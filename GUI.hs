@@ -4,6 +4,7 @@ import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Game
 import System.Random
 import MazeUtils
+import Maze
 
 -- width and height of the window
 width, height :: Int
@@ -40,18 +41,20 @@ data Game = Game
     goalLoc :: (Float, Float),  -- goal (x, y) location.
     mazeWalls :: [(Float, Float, Char)],  -- wall (x,y,dir) locations.
     mwd :: [(Integer, Integer, Char)], -- maze walls with duplicates, used in wall avoidance
-    size :: Float -- grid size
+    size :: Float, -- grid size
+    nextGen :: StdGen
   } deriving Show 
 
 -- initialState creates the starting state of the maze
 -- Places player at bottom left corner and end goal at top right
-initialState :: [(Float, Float, Char)] -> [(Integer, Integer, Char)] -> Float -> Game
-initialState maze mwd size = Game
+initialState :: [(Float, Float, Char)] -> [(Integer, Integer, Char)] -> Float -> StdGen -> Game
+initialState maze mwd size nextGen = Game
   { playerLoc = (0-o+(c/2), 0-o+(c/2)), -- startPoint, handle input from algorithm
     goalLoc = (0+o-(c/2), 0+o-(c/2)), -- endPoint, handle input from algorithm
     mazeWalls = maze,
     mwd = mwd,
-    size = size
+    size = size,
+    nextGen = nextGen
   }
      where
      c = scaleFactor size
@@ -95,7 +98,21 @@ handleInput (EventKey (Char 'w') Down _ _) game
       goalLoc = (goalLoc game),
       mazeWalls = (mazeWalls game),
       mwd = (mwd game),
-      size = (size game) }
+      size = (size game),
+      nextGen = (nextGen game) }
+   | otherwise = game
+      where
+         (x, y) = playerLoc game
+         unit = scaleFactor (size game)
+
+handleInput (EventKey (SpecialKey KeyUp) Down _ _) game
+   | checkMove game 'U' = Game {
+      playerLoc = (x, (y+unit)),
+      goalLoc = (goalLoc game),
+      mazeWalls = (mazeWalls game),
+      mwd = (mwd game),
+      size = (size game),
+      nextGen = (nextGen game) }
    | otherwise = game
       where
          (x, y) = playerLoc game
@@ -107,7 +124,21 @@ handleInput (EventKey (Char 'a') Down _ _) game
       goalLoc = (goalLoc game), 
       mazeWalls = (mazeWalls game), 
       mwd = (mwd game), 
-      size = (size game) }
+      size = (size game),
+      nextGen = (nextGen game) }
+   | otherwise = game
+      where
+         (x, y) = playerLoc game
+         unit = scaleFactor (size game)
+
+handleInput (EventKey (SpecialKey KeyLeft) Down _ _) game
+   | checkMove game 'L' = Game {
+      playerLoc = ((x-unit), y),
+      goalLoc = (goalLoc game),
+      mazeWalls = (mazeWalls game),
+      mwd = (mwd game),
+      size = (size game),
+      nextGen = (nextGen game) }
    | otherwise = game
       where
          (x, y) = playerLoc game
@@ -119,38 +150,70 @@ handleInput (EventKey (Char 's') Down _ _) game
       goalLoc = (goalLoc game),
       mazeWalls = (mazeWalls game),
       mwd = (mwd game),
-      size = (size game) }
+      size = (size game),
+      nextGen = (nextGen game) }
    | otherwise = game
       where
          (x, y) = playerLoc game
          unit = scaleFactor (size game)
-                  
+
+handleInput (EventKey (SpecialKey KeyDown) Down _ _) game
+   | checkMove game 'D' = Game {
+      playerLoc = (x, (y-unit)),
+      goalLoc = (goalLoc game),
+      mazeWalls = (mazeWalls game),
+      mwd = (mwd game),
+      size = (size game),
+      nextGen = (nextGen game) }
+   | otherwise = game
+      where
+         (x, y) = playerLoc game
+         unit = scaleFactor (size game)
+
 handleInput (EventKey (Char 'd') Down _ _) game
    | checkMove game 'R' = Game {
       playerLoc = ((x+unit),y), 
       goalLoc = (goalLoc game), 
       mazeWalls = (mazeWalls game), 
       mwd = (mwd game), 
-      size = (size game) }
+      size = (size game),
+      nextGen = (nextGen game) }
+   | otherwise = game
+      where
+         (x, y) = playerLoc game
+         unit = scaleFactor (size game)
+
+handleInput (EventKey (SpecialKey KeyRight) Down _ _) game
+   | checkMove game 'R' = Game {
+      playerLoc = ((x+unit),y),
+      goalLoc = (goalLoc game),
+      mazeWalls = (mazeWalls game),
+      mwd = (mwd game),
+      size = (size game),
+      nextGen = (nextGen game) }
    | otherwise = game
       where
          (x, y) = playerLoc game
          unit = scaleFactor (size game)
 
 handleInput (EventKey (Char 'r') Down _ _) game =
-   initialState (mazeWalls game) (mwd game) (size game)
+   initialState (mazeWalls game) (mwd game) (size game) (nextGen game)
 
 handleInput _ game = game
 
 -- when the goal is reached, reset the player to initial state
 handleGoal :: Game -> Game
 handleGoal game =
-  if (x2-unit) < x && x < (x2+unit) && (y2-unit) < y && y < (y2+unit) then initialState (mazeWalls game) (mwd game) (size game) -- This resets the game state
+  if (x2-unit) < x && x < (x2+unit) && (y2-unit) < y && y < (y2+unit) then newGame -- This resets the game state
      else game
         where
            (x, y) = playerLoc game
            (x2, y2) = goalLoc game
            unit = (scaleFactor (size game)) / 4
+           (newMaze, newGridInteger, newNextGen) = createMaze (round (size game)) (nextGen game)
+           newMazeWalls = map (parseMazeWall) (removeDuplicateWalls newMaze)
+           newSizeFloat = num newGridInteger
+           newGame = initialState newMazeWalls newMaze newSizeFloat newNextGen
 
 -- gloss update state
 updateState :: Float -> Game -> Game
@@ -158,10 +221,10 @@ updateState _ game = handleGoal game
 
 -- sets initial state and launches the game window
 createGUI :: Integral a => [(Integer, Integer, Char)] -> a -> StdGen -> IO ()
-createGUI maze size ranGen = do
+createGUI maze size nextGen = do
    let mazeWalls = map (parseMazeWall) (removeDuplicateWalls maze)
    let sizeFloat = num size
-   let initState = initialState mazeWalls maze sizeFloat
+   let initState = initialState mazeWalls maze sizeFloat nextGen
    play window white 30 initState renderMaze handleInput updateState
 
 -- helper to simplifly handleInput: search if move is valid by checking surrounding walls

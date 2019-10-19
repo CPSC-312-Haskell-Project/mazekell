@@ -5,6 +5,8 @@ import System.Environment
 import System.Exit
 import System.Random
 import Maze
+import MazeUtils
+import GUI
 
 -- This module contains all CLI logic 
 
@@ -13,10 +15,20 @@ main = do
    args <- getArgs
    verifyArgsOrQuit args
    seed <- getSeed args
+   putStrLn "---"
+   putStrLn "Welcome to Mazekell!"
+   putStrLn "---"
+   putStrLn "Controls:"
+   putStrLn "Use WASD or Arrow Keys to make your way to the end of the maze."
+   putStrLn "Press R to reset your position to the start of the maze."
+   putStrLn "Press Escape to close the game."
+   putStrLn "---"
+   putStrLn "Game Settings:"
    showSeed seed
-   putStrLn "Please enter the grid size"
-   mazeSize <- getNum "\n Please enter a valid number:"
-   createMaze  mazeSize (getRandomGen  seed)
+   putStrLn "Please enter the grid size (2 <= x <= 50):"
+   mazeSize <- getNum "\n Please enter a valid integer (2 <= x <= 50):"
+   let (maze, gridInteger, nextGen) = createMaze mazeSize (getRandomGen  seed)
+   createGUI maze gridInteger nextGen
 
 -- Prompt until a valid number is read, and return it
 getNum :: String -> IO Int
@@ -52,7 +64,7 @@ getRandomSeed = do
 
 -- To ouput seed to the user, so that the same maze can be generated again
 showSeed :: Int -> IO ()
-showSeed seed = putStrLn $ "The random seed is " ++ show seed
+showSeed seed = putStrLn $ "The random seed is " ++ show seed ++ "."
 
 -- Argument verification code
 verifyArgsOrQuit :: [String] -> IO ()
@@ -64,6 +76,7 @@ verifyArgsOrQuit args =
 exitWithBadArgs :: IO ()
 exitWithBadArgs = do 
   progName <- getProgName
+  putStrLn $ "Arg must be an Integer."
   putStrLn $ "Use: " ++  progName ++ " [optional random seed]"
   exitWith $ ExitFailure 1
 
@@ -71,18 +84,21 @@ exitWithBadArgs = do
 -- a random seed.  Nothing else is accepted.
 verifyArgs :: [String] -> Bool
 verifyArgs [] = True
-verifyArgs (x:xs) = Prelude.null xs && isNum x
+verifyArgs [['-']] = False
+verifyArgs (x:xs) = Prelude.null xs && isInt x
 
 -- Validate gridSize which the user inputs
 -- If the user does not input a string, or the value of the integer
--- is > 50, then return false
+-- is > 50 or < 2, then return false
 validateGridSize :: String -> Bool
-validateGridSize input = isNum input && (read input <= 50)
+validateGridSize [] = False
+validateGridSize ['-'] = False
+validateGridSize input = isInt input && (read input <= 50) && (read input >= 2)
 
--- Verify that input is a number.  This approach was chosen as read raises an
+-- Verify that input is an Int.  This approach was chosen as read raises an
 -- exception if it can't parse its input
-isNum :: String -> Bool
-isnum [] = False 
-isNum (x:xs) = all isDigit xs && (x == '-' || isDigit x)
+isInt :: String -> Bool
+isInt [] = False
+isInt (x:xs) = all isDigit xs && (x == '-' || isDigit x)
 
 
