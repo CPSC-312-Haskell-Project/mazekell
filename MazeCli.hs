@@ -10,6 +10,7 @@ import GUI
 
 -- This module contains all CLI logic 
 
+-- The main function calls createMaze and passes it to createGUI
 main :: IO()
 main = do
    args <- getArgs
@@ -27,7 +28,7 @@ main = do
    showSeed seed
    putStrLn "Please enter the grid size (2 <= x <= 50):"
    mazeSize <- getNum "\n Please enter a valid integer (2 <= x <= 50):"
-   let (maze, gridInteger, nextGen) = createMaze mazeSize (getRandomGen  seed)
+   let (maze, gridInteger, nextGen) = createMaze mazeSize (getRandomGen seed)
    createGUI maze gridInteger nextGen
 
 -- Prompt until a valid number is read, and return it
@@ -73,11 +74,12 @@ verifyArgsOrQuit args =
      then putStrLn "args ok!"
      else exitWithBadArgs
 
+-- Show message and exit if the argument is invalid
 exitWithBadArgs :: IO ()
 exitWithBadArgs = do 
   progName <- getProgName
   putStrLn $ "Arg must be an Integer."
-  putStrLn $ "Use: " ++  progName ++ " [optional random seed]"
+  putStrLn $ "Use: " ++  progName ++ " [optional seed]"
   exitWith $ ExitFailure 1
 
 -- Legitimate arguments are none, or a string representing

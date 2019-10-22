@@ -24,21 +24,33 @@ getMaze gridSize randomGen = primsAlgorithm wallList grid cellsSeen gridSize nex
          grid = fromList $ createGrid gridSize
 
 
+{--
+This algorithm is a modified version of Prim's algorithm.
+
+1. Start with a list of all walls.
+2. Pick a cell, mark it as part of the maze. Add the walls of the cell to the wall list.
+3. While there are walls in the list:
+      Pick a random wall from the list. If only one of the two cells that the wall divides is visited, then:
+         - Make the wall a passage and mark the unvisited cell as part of the maze.
+         - Add the neighboring walls of the cell to the wall list.
+      Remove the wall from the list.
+--}
+
 -- Run prim's algorithm
 primsAlgorithm [] grid cellsSeen gridSize randomGenerator = (grid, randomGenerator)
 primsAlgorithm wallList grid cellsSeen gridSize randomGen = primsAlgorithm newWallList newGrid newCellsSeen gridSize newRandom
    where randomIndex = fst $ getRandomIndex randomGen $ length wallList
          newRandom = snd $ getRandomIndex randomGen $ length wallList
-         wall = wallList !! randomIndex
-         intermediateWallList = removeElementAtIndex wallList randomIndex
-         otherWallRep = getSecondRep wall
-         newWallList1 = removeElement otherWallRep intermediateWallList
-         otherCell = getCellFromWall otherWallRep
-         isValidCell = cellInRange otherCell gridSize
-         otherSeen = member otherCell cellsSeen
-         allUnseenCellWalls = allCellWalls otherCell
-         unseenWalls = removeElement otherWallRep allUnseenCellWalls
-         proceed = isValidCell && not otherSeen
+         wall = wallList !! randomIndex                                                       -- pick a wall
+         intermediateWallList = removeElementAtIndex wallList randomIndex                     -- remove the wall and create a new list
+         otherWallRep = getSecondRep wall                                                     -- a wall has two representations, find it
+         newWallList1 = removeElement otherWallRep intermediateWallList                       -- remove second representation of same wall
+         otherCell = getCellFromWall otherWallRep                                             -- get the second cell with the same wall
+         isValidCell = cellInRange otherCell gridSize                                         -- make sure it is not out of bounds
+         otherSeen = member otherCell cellsSeen                                               -- is the second cell already visited?
+         allUnseenCellWalls = allCellWalls otherCell                                          -- get the walls of the second cell
+         unseenWalls = removeElement otherWallRep allUnseenCellWalls                          -- remove the shared wall
+         proceed = isValidCell && not otherSeen                                               -- proceed only if the second cell is valid and not seen
          newWallList = if proceed then unionList unseenWalls newWallList1 else newWallList1
          newGrid1 = if proceed then delete wall grid else grid
          newGrid = if proceed then delete otherWallRep newGrid1 else newGrid1
