@@ -91,6 +91,7 @@ parseWall size (x,y,dir)
          h = c * size
 
 -- keyboard input for game control
+-- handleInput consumes a key event and a game state, and returns the updated game state
 handleInput :: Event -> Game -> Game
 handleInput (EventKey (Char 'w') Down _ _) game
    | checkMove game 'U' = Game {
@@ -201,7 +202,7 @@ handleInput (EventKey (Char 'r') Down _ _) game =
 
 handleInput _ game = game
 
--- when the goal is reached, reset the player to initial state
+-- when the goal is reached, create a new maze with a different seed
 handleGoal :: Game -> Game
 handleGoal game =
   if (x2-unit) < x && x < (x2+unit) && (y2-unit) < y && y < (y2+unit) then newGame -- This resets the game state
@@ -231,7 +232,7 @@ createGUI maze size nextGen = do
 checkMove :: Game -> Char -> Bool
 checkMove game dir = not (findWall (findGridLocation (size game) (playerLoc game) dir) (mwd game))
 
--- converts coordinates to triplet
+-- converts screen coordinates to triplet representation of the wall
 findGridLocation :: Float -> (Float, Float) -> Char -> (Integer, Integer, Char)
 findGridLocation s (x,y) dir = 
    (toInteger (ceiling (s-(fromIntegral (div (toInteger (ceiling (mul*(o+y)))) c)))), 1+(div (toInteger (ceiling (mul*(o+x)))) c), dir)

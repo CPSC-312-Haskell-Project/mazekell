@@ -15,6 +15,7 @@ createMaze gridSize randomGen = (maze, gridInteger, nextGen)
 
 
 -- Top level wrapper for running Prim's Algorithm, that can be called to get a maze
+getMaze :: Integer -> StdGen -> (HashSet (Integer, Integer, Char), StdGen)
 getMaze gridSize randomGen = primsAlgorithm wallList grid cellsSeen gridSize nextGenerator
    where firstRandomCellInt = modRandomNumPair  (num gridSize) $ getPairFromTriplet $ getRandomNumPair randomGen
          firstRandomCell = pairIntToNum firstRandomCellInt
@@ -36,7 +37,12 @@ This algorithm is a modified version of Prim's algorithm.
       Remove the wall from the list.
 --}
 
--- Run prim's algorithm
+primsAlgorithm :: [(Integer, Integer, Char)]
+                  -> HashSet (Integer, Integer, Char)
+                  -> HashSet (Integer, Integer)
+                  -> Integer
+                  -> StdGen
+                  -> (HashSet (Integer, Integer, Char), StdGen)
 primsAlgorithm [] grid cellsSeen gridSize randomGenerator = (grid, randomGenerator)
 primsAlgorithm wallList grid cellsSeen gridSize randomGen = primsAlgorithm newWallList newGrid newCellsSeen gridSize newRandom
    where randomIndex = fst $ getRandomIndex randomGen $ length wallList
