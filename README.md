@@ -1,10 +1,10 @@
-Welcome to Mazekell!
+# Welcome to Mazekell!
 ---
-
+<img src="https://github.com/CPSC-312-Haskell-Project/mazekell/blob/master/Maze.png" alt="Maze" width="300" height="300">
 Project URL: https://wiki.ubc.ca/Course:CPSC312-2019-Maze-Generator
 
-### Generating a maze:
-#### Option 1: Compile and run using GHC (required on macOS):
+## Generating a maze:
+### Option 1: Compile and run using GHC (required on macOS):
 
 ```console
 ghc -- -main-is MazeCli MazeCli.hs -o main -threaded && ./main
@@ -13,7 +13,7 @@ If you want to use a seed:
 ```console
 ghc -- -main-is MazeCli MazeCli.hs -o main -threaded && ./main 1234
 ```
-#### Option 2: Using GHCI:
+### Option 2: Using GHCI:
 
 ```console 
 ghci MazeCli.hs
@@ -21,14 +21,14 @@ ghci MazeCli.hs
 main
 ```
 
-### How to play:
+## How to play:
 1. Use WASD or Arrow Keys to make your way to the end of the maze.
 2. Press R to reset your position to the start of the maze.
 3. Press Escape to close the game.
 
-### Analysis:
+## Analysis:
 
-#### Maze Generation:
+### Maze Generation:
 
 We used randomized Prim’s algorithm to generate mazes. We represented maze walls as triplets (r, c, w), where r is the row number and c is the column number of the cell in the grid, and w is one of ‘L’, ‘R’, ‘U’, ‘D’, representing if it is the left, right, ceiling or floor wall of the cell.
 
@@ -45,7 +45,7 @@ A language that allows saving state, such as Java, Python, etc. would be more sp
 
 On the other hand, the time complexity of the algorithm is fairly reasonable. If there are n walls in a maze, the time complexity to generate that maze is O(n^2)
 
-#### GUI:
+### GUI:
 
 In terms of the GUI, Gloss made the setup and development process smoother. Because the algorithm produced a list of walls to be drawn, we were able to implement a recursive structure to place the walls at the right coordinates on the screen. Functional programming languages work great for these recursively build games. However, with each "update" of the game, i.e. every move, the entire game would be redrawn, which is not efficient.
 
