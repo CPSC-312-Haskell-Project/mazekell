@@ -27,7 +27,7 @@ main = do
    putStrLn "Game Settings:"
    showSeed seed
    putStrLn "Please enter the grid size (2 <= x <= 50):"
-   mazeSize <- getNum "\n Please enter a valid integer (2 <= x <= 50):"
+   mazeSize <- getNum "Please enter a valid integer (2 <= x <= 50):"
    let (maze, gridInteger, nextGen) = createMaze mazeSize (getRandomGen seed)
    createGUI maze gridInteger nextGen
 
@@ -45,7 +45,7 @@ getFromStdin prompt inputF isOk transformOk = do
   if isOk input
      then return $ transformOk input
      else do
-       putStr prompt
+       putStrLn prompt
        getFromStdin prompt inputF isOk transformOk
 
 -- create a random generator with the specified seed value
